@@ -1,2 +1,5 @@
-/1_1/*.filters
-/1_1/*.user
+*.filters
+*.users
+*.user
+.vs/*
+Debug
