@@ -5,6 +5,7 @@ Write a program that prints the list of all pairs of amicable numbers smaller th
 
 #include <iostream>
 #include <cmath>
+#include <set>
 
 using namespace std;
 
@@ -25,6 +26,19 @@ bool is_prime(int v)
 bool is_divisor(int v, int divisor)
 {
 	return v % divisor == 0;
+}
+
+int sum_all_divisor(int v)
+{
+	int divsum = 0;
+	for (int i = 1; i < v; ++i)
+	{
+		if (is_divisor(v, i))
+		{
+			divsum += i;
+		}
+	}
+	return divsum;
 }
 
 int main()
@@ -49,9 +63,24 @@ int main()
 		}
 	}
 	*/
+	set<int> exists;
 	
-	for (int i = 0; i <= max; ++i)
+	for (int a = 1; a <= max; ++a)
 	{
+		if (exists.find(a) == exists.end())
+		{
+			int b = sum_all_divisor(a);
+			
+			if (a == b) continue;
+			
+			int c = sum_all_divisor(b);
+
+			if (a == c)
+			{
+				exists.insert({ a, b });
+				printf("(%d, %d) ", a, b);
+			}
+		}
 	}
 
 	return 0;
