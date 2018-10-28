@@ -1,8 +1,8 @@
 /*
-IPv4 주소를 나타내는 클래스를 작성하라. 콘솔로부터 IPv4 주소들을 읽고 쓸 수 있기 위해 필요
-한 함수를 구현하라. 사용자는 값을 127.0.0.1 이나 168.192.0.100과 같이 점이 포함된 형태
-(dotted form)로 입력할 수 있어야 한다. 또한 IPv4 형태의 주소들을 출력 스트림으로 만들 수
-있어야 한다
+일정 범위 안에서 IPv4 주소들을 열거
+사용자로부터 범위를 나타내는 두 IPv4 주소들을 입력받아서 범위안의 모든 주소들을 열거하는
+프로그램을 작성하라. 본 문제에서 요청된 기능을 구현하기 위해서, 이전 문제에서 정의된 구조를
+확장하라
 */
 
 #include <array>
@@ -121,12 +121,29 @@ std::ostream& operator << (std::ostream& os, const ipv4& v4)
   return os << buf;
 }
 
-
 int main()
 {
-  ipv4 v4("0.0.0.0");
+  string a;
+  string b;
+  cin >> a >> b;
+  
+  ipv4 begin(a);
+  ipv4 end(b);
 
-  std::cout << v4; 
+  cout << "begin: " << begin << endl;
+  cout << "end: " << end << endl;
+
+  while (true)
+  {
+    if (begin == end)
+    {
+      break;
+    }
+    cout << begin << endl;
+    begin++;
+  }
+
+  cout << end;
 
   return 0;
 }
