@@ -14,7 +14,7 @@ void push_back_n(Container& container, Iterator begin, Iterator end)
 	container.reserve(reserveCount);
 	for (auto i = begin; i != end; ++i)
 	{
-		container.push_back(*i);
+		container.push_back(std::move(*i));
 	}
 }
 
