@@ -53,18 +53,25 @@ void do_something()
 	std::this_thread::sleep_for(5s);
 }
 
-int main()
+void print_execution_time(const std::function<void()>& func, std::ostream& os = std::cout)
 {
 	stopwatch sw;
 	sw.restart();
 
-	do_something();
-	
+	func();
+
 	sw.stop();
 
-	cout << "sec: " << sw.get_elapsed_sec() << endl;
-	cout << "ms: " << sw.get_elapsed_ms() << endl;
-	cout << "nanosec: " << sw.get_elapsed_nanosec() << endl;
-	
+	os << "sec: " << sw.get_elapsed_sec() << endl;
+	os << "ms: " << sw.get_elapsed_ms() << endl;
+	os << "nanosec: " << sw.get_elapsed_nanosec() << endl;
+}
+
+#include <sstream>
+
+int main()
+{
+	print_execution_time(do_something);
+
 	return 0;
 }
