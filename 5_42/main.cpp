@@ -21,15 +21,15 @@ class datetime
 {
 public:
 
-	static int get_month_days(int months, bool isLeap)
+	static int get_month_days(int month, bool isLeap)
 	{
 		constexpr int monthDays[]{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-		return (months == 2 && isLeap) ? 29 : monthDays[months - 1];
+		return (month == 2 && isLeap) ? 29 : monthDays[month - 1];
 	}
 
 	static int get_month_days(int year, int month)
 	{
-		return get_month_days(year, is_leap_year(year));
+		return get_month_days(month, is_leap_year(year));
 	}
 
 	static bool is_leap_year(int years)
