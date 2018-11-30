@@ -6,8 +6,8 @@ enum class cell_state
 	live = 1,
 	dead = 2,
 };
-
-struct cell
-{
-	cell_state state = cell_state::nil;
-};
+//
+//struct cell
+//{
+//	cell_state state = cell_state::nil;
+//};

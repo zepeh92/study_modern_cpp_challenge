@@ -9,9 +9,10 @@ The status of the game on each iteration should be displayed on the console, and
 
 */
 
+#include <string>
 #include <iostream>
-#include <sstream>
-#include <vector>
+#include <thread>
+#include <iostream>
 #include <random>
 
 #include "cell.h"
@@ -32,25 +33,24 @@ public:
 
 	void init()
 	{
+		m_gameTick = 0;
 		m_mapFront.init();
 		m_mapBack.init();
 		m_renderbuf.clear();
 		m_renderbuf.reserve(m_row * m_col);
 
-		std::random_device rd;
-		std::mt19937 mt(rd());
-
 		cell_state states[]{
-			cell_state::nil,
 			cell_state::live,
 			cell_state::dead,
 		};
 
+		std::random_device rd;
+		std::mt19937 mt(rd());
 		std::uniform_int_distribution<> rng(0, sizeof(states) / sizeof(cell_state) - 1);
 
-		m_mapFront.for_each([&](int col, int row, cell& c) {
+		m_mapFront.for_each([&](int col, int row, cell_state& state) {
 			const int idx = rng(mt);
-			c.state = states[idx];
+			state = states[idx];
 		});
 
 		m_mapBack = m_mapFront;
@@ -58,31 +58,32 @@ public:
 
 	void update()
 	{
-		m_mapFront.for_each([&](int col, int row, cell& c){
+		m_mapFront.for_each([&](int col, int row, const cell_state& state){
 
-			*m_mapBack.get_cell(col, row) = c;
+			*m_mapBack.get_cell(col, row) = state;
 
-			if (c.state == cell_state::live)
+			if (state == cell_state::live)
 			{
 				const int liveCount = m_mapFront.get_near_cell_count(col, row, cell_state::live);
 
 				if (liveCount < 2 || 3 < liveCount)
 				{// dead
-					m_mapBack.get_cell(col, row)->state = cell_state::dead;
+					*m_mapBack.get_cell(col, row) = cell_state::dead;
 				}
 			}
-			else if(c.state == cell_state::dead)
+			else if(state == cell_state::dead)
 			{
 				const int liveCount = m_mapFront.get_near_cell_count(col, row, cell_state::live);
 
 				if (liveCount == 3)
 				{
-					m_mapBack.get_cell(col, row)->state = cell_state::live;
+					*m_mapBack.get_cell(col, row) = cell_state::live;
 				}
 			}
 		});
 
 		m_mapFront = m_mapBack;
+		++m_gameTick;
 	}
 
 	void render()
@@ -94,13 +95,13 @@ public:
 			for (int col = 0; col != m_col; ++col)
 			{
 				char c;
-				switch (m_mapFront.get_cell(col, row)->state)
+				switch (*m_mapFront.get_cell(col, row))
 				{
 				case cell_state::dead:
-					c = 'X';
+					c = '.';
 					break;
 				case cell_state::live:
-					c = 'O';
+					c = '@';
 					break;
 				case cell_state::nil:
 					c = ' ';
@@ -121,7 +122,7 @@ public:
 		const int liveCellCount = m_mapFront.count_all(cell_state::live);
 		const int deadCellCount = m_mapFront.count_all(cell_state::dead);
 
-		printf("live: %d, dead: %d\n", liveCellCount, deadCellCount);
+		printf("tick: %d, live: %d, dead: %d\n", m_gameTick, liveCellCount, deadCellCount);
 	}
 
 private:
@@ -130,12 +131,13 @@ private:
 	game_map m_mapBack;
 	int m_row = 10;
 	int m_col = 10;
+	int m_gameTick = 0;
 	string m_renderbuf;
 };
 
 int main()
 {
-	game g(10, 20);
+	game g(30, 60);
 	
 	g.init();
 
@@ -143,6 +145,7 @@ int main()
 	{
 		g.update();
 		g.render();
+		std::this_thread::sleep_for(3s);
 	}
 
 	return 0;

@@ -34,12 +34,12 @@ public:
 		}
 	}
 
-	int count_all(cell_state state)
+	int count_all(cell_state countingState)
 	{
 		int count = 0;
-		for_each([&count, state](int x, int y, const cell& c) 
+		for_each([&count, countingState](int x, int y, const cell_state& state)
 		{
-			if (c.state == state)
+			if (countingState == state)
 			{
 				++count;
 			}
@@ -49,7 +49,7 @@ public:
 
 	int get_near_cell_count(int x, int y, cell_state state) const
 	{
-		const cell* nearCells[]
+		const cell_state* nearCells[]
 		{
 			get_cell(x - 1, y - 1),
 			get_cell(x,			y - 1),
@@ -62,11 +62,11 @@ public:
 		};
 
 		int count = 0;
-		for (const cell* nearCell : nearCells)
+		for (const cell_state* nearCell : nearCells)
 		{
 			if (nearCell)
 			{
-				if (nearCell->state == state)
+				if (*nearCell == state)
 				{
 					++count;
 				}
@@ -75,15 +75,15 @@ public:
 		return count;
 	}
 
-	const cell* get_cell(int x, int y) const
+	const cell_state* get_cell(int x, int y) const
 	{
 		const int idx = y * m_row + x;
 		return 0 <= idx && idx < m_cells.size() ? &m_cells[idx] : nullptr;
 	}
 
-	cell* get_cell(int x, int y)
+	cell_state* get_cell(int x, int y)
 	{
-		return const_cast<cell*>(static_cast<const game_map*>(this)->get_cell(x, y));
+		return const_cast<cell_state*>(static_cast<const game_map*>(this)->get_cell(x, y));
 	}
 
 	game_map& operator=(const game_map& rhs)
@@ -99,5 +99,5 @@ private:
 
 	int m_row;
 	int m_col;
-	std::vector<cell> m_cells;
+	std::vector<cell_state> m_cells;
 };
