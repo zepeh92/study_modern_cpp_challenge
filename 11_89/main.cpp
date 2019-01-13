@@ -13,19 +13,19 @@ class CircularIndex
 {
 public:
   
-  CircularIndex(size_t max) :
-    max(max)
+  explicit CircularIndex(int max) :
+    end{ max + 1 }
   {
   }
 
-  size_t operator[](int index) const
+  int operator[](int index) const
   {
-    return static_cast<size_t>(0 <= index ? (index % (max + 1)) : (max + (index + 1) % (max + 1)));
+    return 0 <= index ? (index % end) : ((end -1) + (index + 1) % end);
   }
 
 private:
 
-  size_t max;
+  int end;
 };
 
 struct VigenereTable
@@ -73,7 +73,7 @@ public:
     string ret;
     ret.reserve(str.size());
     int i = 0;
-    CircularIndex rowidx{ key.size() - 1 };
+    CircularIndex rowidx(key.size() - 1);
     transform(str.begin(), str.end(), back_inserter(ret), [&](char c) 
       { 
         int idx = key[rowidx[i++]];
@@ -87,7 +87,7 @@ public:
     string ret;
     ret.reserve(str.size());
     int i = 0;
-    CircularIndex rowidx{ key.size() - 1 };
+    CircularIndex rowidx(key.size() - 1);
     transform(str.begin(), str.end(), back_inserter(ret), [&](char c) 
       {
         int idx = key[rowidx[i++]];
@@ -143,6 +143,6 @@ int main()
   cout << "INPUT: " << input << endl;
   cout << "CIPHER: " << cipher << endl;
   cout << "PLAIN: " << plain << endl;
-  
+
   return 0;
 }
