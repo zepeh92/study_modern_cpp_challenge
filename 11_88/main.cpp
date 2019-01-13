@@ -1,5 +1,6 @@
 /*
 88. Caesar cipher
+대문자만을 대상으로 
 */
 
 #include <algorithm>
@@ -9,6 +10,25 @@
 #include <numeric>
 
 using namespace std;
+
+class CircularIndex
+{
+public:
+
+  explicit CircularIndex(int max) :
+    end{ max + 1 }
+  {
+  }
+
+  int operator[](int index) const
+  {
+    return 0 <= index ? (index % end) : ((end - 1) + (index + 1) % end);
+  }
+
+private:
+
+  int end;
+};
 
 class CeasarCryptor
 {
@@ -47,8 +67,8 @@ public:
   char encrypt(char c) const
   {
     if (!range.in_range(c)) return c;
-    const int index = ((c - range.min) + shift) % range.arr.size();
-    return range.arr[index];
+    CircularIndex idx(range.max - range.min - 1);
+    return range.arr[idx[c - range.min + shift]];
   }
 
   string encrypt(const string& str) const
@@ -68,11 +88,17 @@ private:
 
 int main()
 {
-  CeasarCryptor cryptor(3);
+  string input = "hello COME TO ROME";
+  int shift = 3;
 
-  string cipher = cryptor.encrypt("hello COME TO ROME");
+  CeasarCryptor cryptor(shift);
 
-  cout << cipher << endl;
+  string cipher = cryptor.encrypt(input);
+
+  // 비교) https://ko.wikipedia.org/wiki/%EC%B9%B4%EC%9D%B4%EC%82%AC%EB%A5%B4_%EC%95%94%ED%98%B8
+  cout << "SHIFT: " << shift << endl;
+  cout << "INPUT: " << input << endl;
+  cout << "CIPHER: " << cipher << endl;
 
   return 0;
 }
