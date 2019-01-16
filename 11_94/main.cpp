@@ -101,7 +101,14 @@ public:
     return len;
   }
 
-  int PrivateEncrypt(const void* plain, int plainLength, void* outCipher)
+  // private key encryption supports only these paddings. RSA_PKCS1_PADDING and RSA_NO_PADDING.
+  int PrivateEncrypt(const void* plain, int plainLength, void* outCipher) 
+  {
+    return PrivateEncrypt(plain, plainLength, outCipher, this->padding);
+  }
+
+  // private key encryption supports only these paddings. RSA_PKCS1_PADDING and RSA_NO_PADDING.
+  int PrivateEncrypt(const void* plain, int plainLength, void* outCipher, int padding)
   {
     int len =
       RSA_private_encrypt(
@@ -156,7 +163,7 @@ public:
 
 private:
 
-  int padding = RSA_PKCS1_OAEP_PADDING;
+  int padding = RSA_PKCS1_PADDING; // PKCS #1 v1.5 padding.This currently is the most widely used mode.
   bool hasPublicKey = false;
   bool hasPrivateKey = false;
   RSA* keypair = nullptr;
