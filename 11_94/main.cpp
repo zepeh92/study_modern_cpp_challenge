@@ -13,6 +13,7 @@ The program shoud provide at least two functions: one that signs a file(tasing a
 #include <openssl/rsa.h>
 #include <openssl/bio.h>
 #include <openssl/pem.h>
+#include <openssl/sha.h>
 
 using namespace std;
 
@@ -171,43 +172,73 @@ private:
 
 struct FileSign
 {
-  string publicKey;
+  vector<unsigned char> sign;
+  vector<unsigned char> pubKey;
+  vector<unsigned char> priKey;
 };
 
 class FileSignatory
 {
 public:
 
-  FileSign sign(const filesystem::path& filePath)
+  FileSign Sign(const filesystem::path& filePath)
   {
-    FileSign fileSign;
-    ifstream ifs{ filePath, ios::binary };
-    vector<char> buffer{ istreambuf_iterator<char>(ifs), {} };
+    Rsa256 rsa = Rsa256::Generate(8 * 256);
+
+    vector<unsigned char> fileHash;
+    auto abs = filesystem::absolute(filePath);
+    const wchar_t* cabs = abs.c_str();
+    ifstream ifs;
+    ifs.open(cabs, ios::binary);
+    if (ifs.is_open())
+    {
+      fileHash = MakeHash(ifs);
+      ifs.close();
+    }
     
-    return fileSign;
+    FileSign ret;
+
+    vector<unsigned char> fileSign;
+    fileSign.resize(256);
+    const int fileSignSize = rsa.PrivateEncrypt(fileHash.data(), fileHash.size(), fileSign.data());
+    fileSign.resize(fileSignSize);
+
+    ret.sign = std::move(fileSign);
+    
+    return ret;
   }
 
-  bool is_valid_sign(const filesystem::path& filePath, const FileSign& fileSign) const
+  bool IsValidSign(const vector<unsigned char>& pubKey, const vector<unsigned char>& sign)
   {
-    return false;
+    return true;
   }
+
+  std::vector<unsigned char> MakeHash(std::istream& is)
+  {
+    std::vector<unsigned char> fileHash;
+    fileHash.resize(SHA256_DIGEST_LENGTH);
+
+    SHA256_CTX shactx;
+    SHA256_Init(&shactx);
+    char readBuffer[1024]{ 0, };
+    while (is.good())
+    {
+      is.read(readBuffer, sizeof(readBuffer));
+      int gcnt = is.gcount();
+      SHA256_Update(&shactx, readBuffer, gcnt);
+    }
+    SHA256_Final(fileHash.data(), &shactx);
+
+    return fileHash;
+  }
+
+private:
 };
 
 int main()
 {
-  Rsa256 rsa = Rsa256::Generate(8 * 256);
-  
-  std::string msg = "hello";
-  char msgCipher[1024]{ 0, };
-  int msgCipherLen = rsa.PublicEncrypt(msg.c_str(), msg.length(), msgCipher);
-  char msgPlain[1024]{ 0, };
-  int msgPlainLen = rsa.PrivateDecrypt(msgCipher, msgCipherLen, msgPlain);
-
-  string privateKey = rsa.GetPrivateKey();
-  string publicKey = rsa.GetPublicKey();
-
   FileSignatory fileSignatory;
-  FileSign sign = fileSignatory.sign("./testfile.txt");
+  FileSign sign = fileSignatory.Sign("testfile.txt");
 
   return 0;
 }
